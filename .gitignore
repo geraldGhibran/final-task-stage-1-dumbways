@@ -1,5 +1,8 @@
 ./4/4a/node_modules
+./4/4b/node_modules
 .env
 .env.local
 .node_modules
 ./4/4a/.env
+./4/4b/.env
+./4/4b/** */
