@@ -1,0 +1,5 @@
+./4/4a/node_modules
+.env
+.env.local
+.node_modules
+./4/4a/.env
