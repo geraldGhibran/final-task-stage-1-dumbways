@@ -5,20 +5,15 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 const session = require("cookie-session");
 const flash = require("express-flash");
-const admin = require("firebase-admin");
 const { Sequelize, DataTypes, Op, QueryTypes } = require("sequelize");
 const config = require("./config/config.json");
 const sequelize = new Sequelize(config.development);
 
 const multer = require("multer");
-const serviceAccount = require("./assets/js/service-account");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 require("dotenv").config();
-
-const projectModel = require("./models").project;
-const userModel = require("./models").user;
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "./views"));
@@ -45,25 +40,19 @@ app.use(
 );
 app.use(flash());
 
-app.get("/", home);
-app.post("/name", searchByName);
-app.get("/filter", filterById);
-app.get("/sortbydatedesc", filterByDateDesc);
-app.get("/sortbydateasc", filterByDateAsc);
-app.get("/project", project);
-app.get("/add-project", addProjectView);
-app.post("/project", upload.single("image"), addProject);
+app.get("/", collection);
+// app.get("/", collection);
+app.get("/add-collection", addCollectionView);
+app.post("/add-collection", addCollection);
+app.post("/add-task", addTask);
 app.get("/delete-project/:id/imageId/:imageId", deleteProject);
 app.get("/edit-project/:id", editProjectView);
-app.get("/edit-project/:id", convertDate);
 app.post(
   "/edit-project/:id/imageId/:imageId",
   upload.single("image"),
   editProject
 );
-app.get("/contact", contact);
-app.get("/testimonial", testimonial);
-app.get("/project-detail/:id", projectDetail);
+app.get("/collection-detail/:id", collectionDetail);
 
 app.get("/login", loginView);
 app.get("/register", registerView);
@@ -71,7 +60,6 @@ app.get("/register", registerView);
 app.post("/register", register);
 app.post("/login", login);
 app.get("/logout", logout);
-app.get("/test", test);
 app.engine("html", require("hbs").__express);
 
 hbs.registerHelper("includes", function (array, value, options) {
@@ -86,15 +74,6 @@ hbs.registerHelper("ifEquals", function (arg1, arg2, options) {
   return arg1 === arg2 ? options.fn(this) : options.inverse(this);
 });
 
-// let { storageBucket } = process.env;
-
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   storageBucket: storageBucket,
-// });
-
-// const bucket = admin.storage().bucket();
-
 function loginView(req, res) {
   res.render("login");
 }
@@ -103,18 +82,16 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const user = await userModel.findOne({
-      where: {
-        email: email,
-      },
-    });
+    const query = `SELECT * FROM public.users_tb WHERE email = '${email}';`;
+
+    const user = await sequelize.query(query, { type: QueryTypes.SELECT });
 
     if (!user) {
       req.flash("error", "Email / password salah!");
       return res.redirect("/login");
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user[0].password);
 
     if (!isValidPassword) {
       req.flash("error", "Email / password salah!");
@@ -127,6 +104,7 @@ async function login(req, res) {
 
     res.redirect("/");
   } catch (error) {
+    console.log(error);
     req.flash("error", "Something went wrong!");
     res.redirect("/");
   }
@@ -152,7 +130,6 @@ async function register(req, res) {
 	username, email, password)
 	VALUES ('${name}', '${email}', '${hashedPassword}');`;
     const result = await sequelize.query(query, { type: QueryTypes.INSERT });
-    console.log("isi result", result);
 
     req.flash("success", "Register berhasil!");
     res.redirect("/register");
@@ -163,69 +140,24 @@ async function register(req, res) {
   }
 }
 
-
-// SELECT public.collections_tb.*, public.users_tb.username AS username FROM public.collections_tb INNER JOIN public.users_tb 
-// 	ON public.collections_tb."user_id" = public.users_tb.id;
-
-// SELECT public.task_tb.*, public.collections_tb.user_id AS user FROM public.task_tb INNER JOIN public.collections_tb_tb 
-// 	ON public.task_tb."collections_id" = public.collections_tb_tb.id
 async function home(req, res) {
   const user = req.session.user;
   // const result = await projectModel.findAll();
 
-  res.render("register", {
+  res.render("index", {
     user,
   });
 }
 
-async function filterById(req, res) {
+async function collection(req, res) {
   const user = req.session.user;
-  const result = await projectModel.findAll({
-    where: { userId: user.id },
-  });
-
-  res.render("index", { data: result, user });
-}
-
-async function searchByName(req, res) {
-  const user = req.session.user;
-  let { projectName } = req.body;
-  // console.log(req.body);
-  const result = await projectModel.findAll({
-    where: {
-      projectName: {
-        [Op.like]: `%${projectName}%`,
-      },
-    },
-  });
+  const query = `SELECT * FROM public.collections_tb WHERE user_id = '${user[0].id}';`;
+  const result = await sequelize.query(query, { type: QueryTypes.SELECT });
 
   console.log(result);
+  console.log(user);
 
-  res.render("index", { data: result, user });
-}
-
-async function filterByDateDesc(req, res) {
-  const user = req.session.user;
-  const result = await projectModel.findAll({
-    order: [["createdAt", "DESC"]],
-  });
-
-  res.render("index", { data: result, user });
-}
-async function filterByDateAsc(req, res) {
-  const user = req.session.user;
-  const result = await projectModel.findAll({
-    order: [["createdAt", "ASC"]],
-  });
-
-  res.render("index", { data: result, user });
-}
-
-async function project(req, res) {
-  const result = await projectModel.findAll();
-  const user = req.session.user;
-
-  res.render("project", {
+  res.render("index", {
     data: result,
     user,
   });
@@ -252,60 +184,55 @@ async function deleteProject(req, res) {
     },
   });
 
-  // bucket.file(imageId).delete();
   res.redirect("/");
 }
 
-async function addProject(req, res) {
+async function addCollection(req, res) {
   const user = req.session.user;
-  const file = req.file;
+  const { collectionName } = req.body;
 
   if (!user) {
     return res.redirect("/login");
   }
 
-  if (!file) {
-    return res.status(400).send("No file uploaded.");
-  }
-
   try {
-    // const fileRef = bucket.file(file.originalname);
-    const [url] = await fileRef.getSignedUrl({
-      action: "read",
-      expires: "03-17-2025",
-    });
-    // await fileRef.save(file.buffer, {
-    //   metadata: { contentType: file.mimetype },
-    //   resumable: false,
-    // });
-    const {
-      projectName,
-      description,
-      startDate,
-      endDate,
-      nodejs,
-      typescript,
-      reactjs,
-      nextjs,
-    } = req.body;
-    const duration = calculateDuration(startDate, endDate);
-    // await projectModel.create({
-    //   projectName: projectName,
-    //   startDate: startDate,
-    //   endDate: endDate,
-    //   description: description,
-    //   technologies: [nodejs, typescript, reactjs, nextjs],
-    //   createdAt: new Date(),
-    //   image: url,
-    //   imageId: file.originalname,
-    //   userId: user.id,
-    //   author: user.name,
-    //   duration: duration.months + " months",
-    // });
+
+    console.log(req.body);
+
+    const query = `INSERT INTO public.collections_tb(name, user_id )
+      VALUES ('${collectionName}', '${user[0].id}' );`;
+    const result = await sequelize.query(query, { type: QueryTypes.INSERT });
+    console.log("isi result", result);
+
+    req.flash("success", "Input collection success");
 
     res.redirect("/");
   } catch (error) {
-    console.log(error);
+    res.status(500).send(`Error: ${error.message}`);
+  }
+}
+
+async function addTask(req, res) {
+  const user = req.session.user;
+  const { taskName, collections_id } = req.body;
+  console.log(req.body);
+
+  if (!user) {
+    return res.redirect("/login");
+  }
+
+  try {
+
+
+
+    const query = `INSERT INTO public.task_tb(name, is_done, collections_id )
+      VALUES ('${taskName}', false, '${collections_id}' );`;
+    const result = await sequelize.query(query, { type: QueryTypes.INSERT });
+
+    req.flash("success", "Input task success");
+
+    res.redirect("/collection-detail/" + collections_id);
+  } catch (error) {
     res.status(500).send(`Error: ${error.message}`);
   }
 }
@@ -357,15 +284,6 @@ async function editProject(req, res) {
   } = req.body;
 
   try {
-    // const fileRef = bucket.file(imageId);
-    // const [url] = await fileRef.getSignedUrl({
-    //   action: "read",
-    //   expires: "03-17-2025",
-    // });
-    // await fileRef.save(file.buffer, {
-    //   metadata: { contentType: file.mimetype },
-    //   resumable: false,
-    // });
     const project = await projectModel.findOne({
       where: {
         id: id,
@@ -393,93 +311,35 @@ async function editProject(req, res) {
   }
 }
 
-function addProjectView(req, res) {
+function addCollectionView(req, res) {
   const user = req.session.user;
-  res.render("add-project", { user });
+  res.render("collection", { user });
 }
 
 function contact(req, res) {
   res.render("contact");
 }
 
-function testimonial(req, res) {
-  const user = req.session.user;
-  res.render("testimonial", { user });
-}
-
-function calculateDuration(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  let years = end.getFullYear() - start.getFullYear();
-  let months = end.getMonth() - start.getMonth();
-  let days = end.getDate() - start.getDate();
-
-  if (days < 0) {
-    months--;
-    days += new Date(end.getFullYear(), end.getMonth(), 0).getDate();
-  }
-
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
-
-  return { years, months, days };
-}
-
-async function projectDetail(req, res) {
+async function collectionDetail(req, res) {
   const user = req.session.user;
   const { id } = req.params;
-  const result = await projectModel.findOne({
-    where: {
-      id: id,
-    },
-  });
+  const query2 = `SELECT * FROM public.collections_tb WHERE id = '${id}'`;
+  const result2 = await sequelize.query(query2, { type: QueryTypes.SELECT });
 
-  const inputDateString = result.createdAt;
+  const query = `
+  SELECT public.task_tb.*, public.collections_tb.user_id AS user FROM public.task_tb INNER JOIN public.collections_tb
+	ON ${id} = public.collections_tb.id`;
 
-  const inputDate = new Date(inputDateString);
-
-  const currentDate = new Date();
-
-  const diffYears = currentDate.getFullYear() - inputDate.getFullYear();
-  const diffMonths =
-    currentDate.getMonth() - inputDate.getMonth() + diffYears * 12;
-
-  const dayDifference = currentDate.getDate() - inputDate.getDate();
-  const totalMonthDifference = dayDifference < 0 ? diffMonths - 1 : diffMonths;
+  const result = await sequelize.query(query, { type: QueryTypes.SELECT });
+  // console.log(result);
+  console.log(result2);
 
   if (!result) return res.render("not-found");
-  res.render("project-detail", {
+  res.render("collection-detail", {
     data: result,
-    startDate: convertDate(result.startDate),
-    endDate: convertDate(result.endDate),
-    createdDate: totalMonthDifference + " months ago",
-    nodejs: result.technologies.includes("nodejs") ? "nodejs" : "",
-    typescript: result.technologies.includes("typescript") ? "typescript" : "",
-    reactjs: result.technologies.includes("reactjs") ? "reactjs" : "",
-    nextjs: result.technologies.includes("nextjs") ? "nextjs" : "",
+    collection: result2[0],
     user,
   });
-}
-
-function convertDate(dates) {
-  // Original date string
-  const dateString = dates;
-
-  // Create a new Date object
-  const date = new Date(dateString);
-
-  // Extract the year, month, and day
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-  const day = String(date.getDate()).padStart(2, "0");
-
-  // Format the date as yyyy-MM-dd
-  const formattedDate = `${year}-${month}-${day}`;
-
-  return formattedDate;
 }
 
 app.listen(port, () => {

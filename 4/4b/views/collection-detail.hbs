@@ -69,18 +69,6 @@
                 <a class="nav-link text-dark poppins-regular" href="/">Home
                   <span class="sr-only">(current)</span></a>
               </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link text-dark poppins-regular"
-                  href="/project"
-                >Add Project</a>
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link text-dark poppins-bold"
-                  href="/testimonial"
-                >Testimonial</a>
-              </li>
             </ul>
           </div>
           <div>
@@ -162,79 +150,138 @@
 
     <div class="container">
       <div class="jumbotron p-3 p-md-5 text-white rounded"></div>
-      <h1
-        class="poppins-bold d-flex justify-content-center"
-      >{{data.projectName}}</h1>
-      <div class="row">
-        <div class="col-md-8">
-          <img src="{{data.image}}" alt="" class="img-fluid w-100" />
+
+       <div class="container">
+        <div class="jumbotron p-3 p-md-5 text-white rounded"></div>
+
+          
+        {{#if messages.error}}
+          <div class="alert alert-danger" role="alert">
+            {{messages.error}}
+          </div>
+        {{/if}}
+        {{#if messages.success}}
+          <div class="alert alert-success" role="alert">
+            {{messages.success}}
+          </div>
+        {{/if}}
+      </div>
+
+      <div class="d-flex justify-content-start">
+        <div class="p-2">
+          <a
+          {{!-- href="/edit-project/{{id}}" --}}
+          class="btn btn-dark mx-2"
+        ><i class="fa-solid fa-chevron-left"></i></a>
 
         </div>
-        <div class="col-md-4">
-          <div class="p-4">
-            <h4 class="poppins-semibold">Duration</h4>
-            <p class="poppins-regular">
-              <i class="fa-regular fa-calendar-days"></i>
-              {{startDate}}
-              -
-              <i class="fa-regular fa-calendar-days"></i>
-              {{endDate}}
-            </p>
-            <p class="poppins-regular">
-              <i class="fa-regular fa-clock fa-lg"></i>
-              {{data.duration}}
+           {{!-- <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12"> --}}
+            <div class="p-2">
 
-            </p>
+              <div class="card ">
+                <div class="card-body">
+                  <p class="card-text poppins-bold">
+                    <strong>{{collection.name}}</strong>
+                  </p>
 
-          </div>
-          <div class="p-4">
-            <h4 class="poppins-semibold">Technologies</h4>
-            <p class="poppins-regular">
-              {{#if nodejs}}
-                <i class="fa-brands fa-node-js fa-xl"></i>
-                {{nodejs}}
-              {{/if}}
-              <i></i>
-              {{#if reactjs}}
-                <i class="fa-brands fa-react fa-xl"></i>
-                {{reactjs}}
-              {{/if}}
-              <i></i>
-            </p>
-            <p class="poppins-regular">
-              {{#if typescript}}
-                <img
-                  src="https://img.icons8.com/?size=100&id=cHBUT9SmrD2V&format=png&color=000000"
-                  style="width: 25px; height: 25px"
-                  alt=""
+                </div>
+              </div>
+            </div>
+          {{!-- </div> --}}
+      </div>
+
+        <form method="post" action="/add-task">
+            <div class="d-flex justify-content-between">
+              <input
+                  class="form-control w-100 d-none"
+                  placeholder="Enter task name"
+                  name="collections_id"
+                  value="{{collection.id}}"
                 />
-                {{typescript}}
-              {{/if}}
-              <i></i>
-
-              {{#if nextjs}}
-                <img
-                  src="https://img.icons8.com/?size=100&id=MWiBjkuHeMVq&format=png&color=000000"
-                  style="width: 25px; height: 25px"
-                  alt=""
+              <div class="form-group" 
+                  style="width: 75rem;" >
+                <input
+                  class="form-control w-100"
+                  placeholder="Enter task name"
+                  name="taskName"
+                  required
                 />
-                {{nextjs}}
-              {{/if}}
-              <i></i>
-            </p>
+              </div>
+              <div >
+                <button type="submit" class="btn btn-dark w-100">Add</button>
+              </div>
+            </div>
+          </form>
 
+      
+        <div class="row">
+        <h1 class="poppins-bold">Task</h1>
+        {{#each data}}
+          <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <div class="p-2">
+
+              <div class="card w-100">
+                <div class="card-body d-flex justify-content-between">
+                  
+                <div class="p-2">
+                    <h3
+                    class="card-text poppins-regular"
+                  >
+                    {{name}}
+                  </h3>
+                </div>
+                 <div class="p-2">
+                    <input type="checkbox" id="is_done" name="is_done" 
+                    {{#if is_done}}
+                    checked {{/if}} !checked
+                  value="is_done" />
+                    <label for="is_done">Is Done</label>
+                 </div>
+
+                </div>
+              </div>
+            </div>
           </div>
-
-            <div class="p-4">
-            <h4 class="poppins-semibold">Author</h4>
-            <p class="poppins-regular">
-              <i class="fa-regular fa-user fa-lg"></i>
-              {{data.author}}
-            </p>
-
+          <div
+            class="modal fade"
+            id="exampleModal"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="exampleModalLabel">Modal
+                    title</h1>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  Are you sure want to delete
+                  {{name}}??
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >Close</button>
+                  <a
+                    href="/delete-project/{{id}}/imageId/{{imageId}}"
+                    class="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="/delete-project/{{id}}/imageId/{{imageId}}"
+                  >Delete Post</a>
+                </div>
+              </div>
+            </div>
           </div>
-
-        </div>
+        {{/each}}
       </div>
 
     </div>

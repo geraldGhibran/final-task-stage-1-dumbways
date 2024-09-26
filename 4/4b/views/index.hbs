@@ -79,23 +79,10 @@
                 <a class="nav-link text-dark poppins-bold" href="/">Home
                   <span class="sr-only">(current)</span></a>
               </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link text-dark poppins-regular"
-                  href="/project"
-                >Add Project</a>
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link text-dark poppins-regular"
-                  href="/testimonial"
-                >Testimonial</a>
-              </li>
             </ul>
             <div>
               <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 {{#if user}}
-                  {{!-- <h1>Hello, {{user.name}}</h1> --}}
                   <li class="nav-item">
                     <p
                       class="nav-link text-dark poppins-regular mt-2"
@@ -158,133 +145,14 @@
             {{messages.success}}
           </div>
         {{/if}}
-        <div class="row mb-2">
-          <div class="card flex-md-row mb-4 shadow p-3 mb-5 bg-body rounded h-md-250">
-            <div class="col-md-6 col-lg-6 col-xl-6 mr-5">
-              <div class="card-body d-flex flex-column align-items-start">
-                <div>
-                  <h1 class="poppins-bold text-black" style="text-align: center">
-                    Welcome to my personal website
-                  </h1>
-                  <p class="poppins-regular">
-                    A Full Stack Node.js Developer is a highly skilled
-                    professional adept at both front-end and back-end
-                    development. They leverage JavaScript and Node.js to build
-                    robust, scalable web applications, ensuring seamless user
-                    experiences and efficient server-side operations. Their
-                    expertise spans across various technologies, including
-                    databases, APIs, and front-end frameworks, enabling them to
-                    create comprehensive, end-to-end solutions. This versatility
-                    makes them invaluable in modern web development projects.
-                  </p>
-                  <div class="d-flex flex-row mb-3">
-                    <div class="p-2">
-                      <button
-                        class="poppins-semibold"
-                        style="
-                          background-color: black;
-                          border-radius: 20px;
-                          color: white;
-                          width: 100px;
-                          height: 35px;
-                        "
-                      >
-                        contact
-                      </button>
-                    </div>
-                    <div class="p-2 mt-2">
-                      <p class="poppins-semibold">
-                        download cv
-                        <i class="fa fa-download" aria-hidden="true"></i>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="social-icons">
-                    <a href="#" title="instagram">
-                      <i class="fa fa-instagram" aria-hidden="true"></i>
-                    </a>
-                    <a href="#" title="youtube">
-                      <i class="fa fa-youtube-square" aria-hidden="true"></i>
-                    </a>
-                    <a href="#" title="linkedin">
-                      <i class="fa fa-linkedin-square" aria-hidden="true"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="col-md-4 col-xl-5 pt-5 offset-md-1 d-none d-xl-block"
-              style="height: 500px"
-            >
-              <div class="card text-center h-100 shadow p-3 mb-5 bg-body rounded w-75" style="width: 18rem">
-                <img src="assets/img/img1.jpg" class="card-img-top" alt="..." />
-                <div class="card-body">
-                  <h5 class="card-title poppins-bold">
-                    Gerald Ghibran Gunasha
-                  </h5>
-                  <p class="card-text poppins-regular">Fullstack Developer</p>
-                </div>
-              </div>
-            </div>
-            <div
-              class="col-md-4 col-xl-3 pt-5 d-flex justify-content-center mb-5"
-            >
-              <div
-                class="card text-center d-block d-xl-none searchResults"
-                style="width: 18rem"
-              >
-                <img src="assets/img/img1.jpg" class="card-img-top" alt="..." />
-                <div class="card-body">
-                  <h5 class="card-title poppins-bold">
-                    Gerald Ghibran Gunasha
-                  </h5>
-                  <p class="card-text poppins-regular">Fullstack Developer</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="container marketing">
        
         <div class="row">
-          <h1 class="poppins-bold text-dark" style="text-align: center">
-           MY PROJECT
+          <h1 class="poppins-bold text-dark">
+           COLLECTIONS
           </h1>
-          <div class="row justify-content-start">
-            <div class="col-6 sm:col-12">
-              <form method="post" action="/name" >
-               <input
-                  id="input-project-name"
-                  class="form-control"
-                  aria-describedby="emailHelp"
-                  placeholder="Enter project name..."
-                  name="projectName"
-                />
-              </form>
-              
-            </div>
-            <div class="col-3 sm:col-12">
-               <div class="form-group">
-                  <select class="form-select" onchange="redirectToPage(this)" id="subject">
-                    <option value="">Filter by user</option>
-                    <option value="/filter" onclick="/filter">{{user.name}}</option>
-                    <option value="/">All</option>
-                  </select>
-                </div>
-            </div>
-             <div class="col-3 sm:col-12">
-               <div class="form-group">
-                  <select class="form-select" onchange="redirectToPage(this)" id="subject">
-                    <option value="">Sort by date</option>
-                    <option value="/sortbydatedesc">latest</option>
-                    <option value="/sortbydateasc">oldest</option>
-                    <option value="/">All</option>
-                  </select>
-                </div>
-            </div>
-          </div>
+      
           <div id="contents" class="blog-list">
             
             
@@ -294,7 +162,7 @@
                   <div class="p-2">
 
                     <div class="card" style="width: 18rem;">
-                      <a href="/project-detail/{{id}}">
+                      <a href="/collection-detail/{{id}}">
                         <img
                           src="{{image}}"
                           style="height: 200px;"
@@ -305,7 +173,7 @@
                       <div class="card-body">
 
                         <p class="card-text poppins-bold">
-                          <strong>{{projectName}}</strong>
+                          <strong>{{name}}</strong>
                           
                         </p>
                          <p class="card-text poppins-regular" style="margin-top: -19px;">
@@ -313,45 +181,14 @@
                           
                         </p>
                          <p class="card-text poppins-regular" style="margin-top: -19px;">
-                          by : {{author}}
+                          by : {{name}}
                           
                         </p>
                          <p class="card-text col-12 text-truncate" style="margin-top: -10px;" >
                             {{description}}
                           </p>
                           
-                            <p class="poppins-regular mb-4">
-                              {{#includes technologies 'nodejs'}}
-                                <i class="fa-brands fa-node-js fa-xl"></i>
-                              {{else}}
-                              <div></div>
-                              {{/includes}}
-                              {{#includes technologies 'reactjs'}}
-                              <i class="fa-brands fa-react fa-xl"></i>
-                              {{else}}
-                                <div></div>
-                              {{/includes}}
-                              {{#includes technologies 'nextjs'}}
-                              <img
-                                src="https://img.icons8.com/?size=100&id=MWiBjkuHeMVq&format=png&color=000000"
-                                style="width: 25px; height: 25px"
-                                alt=""
-                              />
-                              {{else}}
-                                <div></div>
-                              {{/includes}}
-                               {{#includes technologies 'typescript'}}
-                               <img
-                                src="https://img.icons8.com/?size=100&id=cHBUT9SmrD2V&format=png&color=000000"
-                                style="width: 25px; height: 25px"
-                                alt=""
-                              />
-                              {{else}}
-                                <div></div>
-                              {{/includes}}
-
-
-                            </p>
+                          
                              {{#if ../user}}
                              {{#ifEquals ../user.id userId}}
                                  <a
@@ -393,7 +230,7 @@
                       </div>
                       <div class="modal-body">
                         Are you sure want to delete
-                        {{projectName}}??
+                        {{name}}??
                       </div>
                       <div class="modal-footer">
                         <button
@@ -414,9 +251,6 @@
               {{/each}}
             </div>
           </div>
-          <!-- navbar end -->
-
-          <!-- Edit Module End -->
         </div>
       </div>
     </main>
