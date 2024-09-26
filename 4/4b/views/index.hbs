@@ -152,7 +152,6 @@
           <h1 class="poppins-bold text-dark">
            COLLECTIONS
           </h1>
-      
           <div id="contents" class="blog-list">
             
             
@@ -160,53 +159,36 @@
               {{#each data}}
                 <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                   <div class="p-2">
-
-                    <div class="card" style="width: 18rem;">
-                      <a href="/collection-detail/{{id}}">
-                        <img
-                          src="{{image}}"
-                          style="height: 200px;"
-                          class="mh-100 card-img-top d-flex sm:justify-content-center"
-                          alt="Image"
-                        />
-                      </a>
+                        <a href="/collection-detail/{{id}}" class="text-decoration-none text-reset">
+                         <div class="card" style="width: 18rem;">
+                      <p class="p-4 mt-3">
+                          <i class="fa-solid fa-bars-progress fa-2xl"></i>
+                      </p>
                       <div class="card-body">
-
                         <p class="card-text poppins-bold">
                           <strong>{{name}}</strong>
-                          
                         </p>
-                         <p class="card-text poppins-regular" style="margin-top: -19px;">
-                          duration : {{duration}}
-                          
                         </p>
-                         <p class="card-text poppins-regular" style="margin-top: -19px;">
-                          by : {{name}}
-                          
-                        </p>
-                         <p class="card-text col-12 text-truncate" style="margin-top: -10px;" >
-                            {{description}}
-                          </p>
                           
                           
                              {{#if ../user}}
                              {{#ifEquals ../user.id userId}}
                                  <a
-                                  href="/edit-project/{{id}}"
-                                  class="btn btn-dark mx-2"
-                                >Edit <i class="fa-solid fa-pen-to-square"></i></a>
-                                <button type="button"
-                                  class="btn btn-danger"
-                                  data-bs-toggle="modal" data-bs-target="#exampleModal"
-                                >Delete <i class="fa-solid fa-trash"></i></button>
+                                  href="/edit-collection/{{id}}"
+                                  class="btn btn-dark mx-2 my-3"
+                                >Edit</a>
                               {{else}}
                                 <div></div>
                               {{/ifEquals}}
                             {{/if}}
                       </div>
                     </div>
+                        </a>
+                   
+
                   </div>
                 </div>
+                
                 <div
                   class="modal fade"
                   id="exampleModal"
@@ -249,6 +231,22 @@
                   </div>
                 </div>
               {{/each}}
+
+               <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3 ">
+                <a href="/add-collection" class="text-decoration-none text-reset">
+                  <div class="card ml-3" style="width: 18rem; height: 14rem; margin-top: 8px; margin-left:8px;">
+                    {{!-- <img class="card-img-top" src="..." alt="Card image cap"> --}}
+                    <div class="card-body d-flex justify-content-center align-items-center">
+                      <h5 class="card-title"> </h5>
+                       <p class="p-4 mt-3">
+                          <i class="fa-solid fa-plus fa-2xl p-5"></i>
+                      </p>
+                      {{!-- <a href="#" class="btn btn-primary"> </a> --}}
+                    </div>
+                  </div>
+                
+                </a>
+                </div>
             </div>
           </div>
         </div>

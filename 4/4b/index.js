@@ -41,16 +41,18 @@ app.use(
 app.use(flash());
 
 app.get("/", collection);
-// app.get("/", collection);
 app.get("/add-collection", addCollectionView);
 app.post("/add-collection", addCollection);
 app.post("/add-task", addTask);
-app.get("/delete-project/:id/imageId/:imageId", deleteProject);
-app.get("/edit-project/:id", editProjectView);
+app.get("/delete-collection/:id", deleteCollection);
+app.get("/edit-collection/:id", editCollectionView);
+app.get(
+  "/edit-task/:id/collection_id/:collection_id",
+  editTask
+);
 app.post(
-  "/edit-project/:id/imageId/:imageId",
-  upload.single("image"),
-  editProject
+  "/edit-collection",
+  editCollection
 );
 app.get("/collection-detail/:id", collectionDetail);
 
@@ -140,22 +142,22 @@ async function register(req, res) {
   }
 }
 
-async function home(req, res) {
-  const user = req.session.user;
-  // const result = await projectModel.findAll();
-
-  res.render("index", {
-    user,
-  });
-}
 
 async function collection(req, res) {
   const user = req.session.user;
-  const query = `SELECT * FROM public.collections_tb WHERE user_id = '${user[0].id}';`;
+  
+  if(!user) {
+    return res.redirect("/login");
+  }
+
+  
+  
+  const query = `SELECT * FROM public.collections_tb WHERE user_id = '${user[0]?.id}'`;
   const result = await sequelize.query(query, { type: QueryTypes.SELECT });
 
-  console.log(result);
-  console.log(user);
+  // const queryTask = `SELECT * FROM public.task_tb WHERE collections_id = '${id}'`;
+
+  // const resultTask = await sequelize.query(queryTask, { type: QueryTypes.SELECT });
 
   res.render("index", {
     data: result,
@@ -163,26 +165,15 @@ async function collection(req, res) {
   });
 }
 
-async function test(req, res) {
-  res.render("test");
-}
 
-async function deleteProject(req, res) {
-  const { id, imageId } = req.params;
+async function deleteCollection(req, res) {
+  const { id} = req.params;
 
-  let result = await projectModel.findOne({
-    where: {
-      id: id,
-    },
-  });
+ const query = `DELETE FROM public.collections_tb
+	WHERE id = ${id};`;
+  const result = await sequelize.query(query, { type: QueryTypes.DELETE });
 
   if (!result) return res.render("not-found");
-
-  await projectModel.destroy({
-    where: {
-      id: id,
-    },
-  });
 
   res.redirect("/");
 }
@@ -191,13 +182,14 @@ async function addCollection(req, res) {
   const user = req.session.user;
   const { collectionName } = req.body;
 
+  console.log(collectionName);
+
   if (!user) {
     return res.redirect("/login");
   }
 
   try {
 
-    console.log(req.body);
 
     const query = `INSERT INTO public.collections_tb(name, user_id )
       VALUES ('${collectionName}', '${user[0].id}' );`;
@@ -215,15 +207,12 @@ async function addCollection(req, res) {
 async function addTask(req, res) {
   const user = req.session.user;
   const { taskName, collections_id } = req.body;
-  console.log(req.body);
 
   if (!user) {
     return res.redirect("/login");
   }
 
   try {
-
-
 
     const query = `INSERT INTO public.task_tb(name, is_done, collections_id )
       VALUES ('${taskName}', false, '${collections_id}' );`;
@@ -237,30 +226,20 @@ async function addTask(req, res) {
   }
 }
 
-async function editProjectView(req, res) {
+async function editCollectionView(req, res) {
   const { id } = req.params;
   const user = req.session.user;
 
-  const result = await projectModel.findOne({
-    where: {
-      id: id,
-    },
-  });
-
+  const query = `SELECT * FROM public.collections_tb WHERE id = ${id}`;
+  const result = await sequelize.query(query, { type: QueryTypes.SELECT });
   if (!user) {
     return res.redirect("/login");
   }
 
   if (!result) return res.render("not-found");
-
-  res.render("edit-project", {
-    data: result,
-    startDate: convertDate(result.startDate),
-    endDate: convertDate(result.endDate),
-    typescript: result.technologies.indexOf("typescript") !== -1,
-    nodejs: result.technologies.indexOf("nodejs") !== -1,
-    nextjs: result.technologies.indexOf("nextjs") !== -1,
-    reactjs: result.technologies.indexOf("reactjs") !== -1,
+  res.render("edit-collection", {
+    data: result[0],
+    user,
   });
 
   if (!user) {
@@ -268,42 +247,71 @@ async function editProjectView(req, res) {
   }
 }
 
-async function editProject(req, res) {
-  const { id, imageId } = req.params;
-  const file = req.file;
 
-  const {
-    projectName,
-    description,
-    startDate,
-    endDate,
-    nodejs,
-    typescript,
-    reactjs,
-    nextjs,
-  } = req.body;
+function addCollectionView(req, res) {
+  const user = req.session.user;
+  res.render("collection", { user });
+}
+
+
+async function collectionDetail(req, res) {
+  const user = req.session.user;
+  const { id } = req.params;
+  const queryCollection = `SELECT * FROM public.collections_tb WHERE id = '${id}'`;
+  const result2 = await sequelize.query(queryCollection, { type: QueryTypes.SELECT });
+
+  const query = `SELECT * FROM public.task_tb WHERE collections_id = '${id}'`;
+
+  const result = await sequelize.query(query, { type: QueryTypes.SELECT });
+
+  const queryIsDoneTrue = `SELECT * FROM public.task_tb WHERE is_done = true AND collections_id = '${id}'`;
+
+  const resultIsDoneTrue = await sequelize.query(queryIsDoneTrue, { type: QueryTypes.SELECT });
+
+  const queryIsDoneFalse = `SELECT * FROM public.task_tb WHERE is_done = false AND collections_id = '${id}'`;
+
+  const resultIsDoneFalse = await sequelize.query(queryIsDoneFalse, { type: QueryTypes.SELECT });
+  console.log(resultIsDoneTrue);
+
+  if (!result) return res.render("not-found");
+  res.render("collection-detail", {
+    data: result,
+    collection: result2[0],
+    user: user[0],
+    dataIsDoneTrue: resultIsDoneTrue,
+    dataIsDoneFalse: resultIsDoneFalse,
+  });
+}
+
+async function editTask(req, res) {
+  const { id, collection_id } = req.params;
+
+  const query = `UPDATE public.task_tb
+	SET is_done=true
+	WHERE id=${id};`
+
+  const result = await sequelize.query(query, { type: QueryTypes.UPDATE });
+
+  res.redirect("/collection-detail/" + collection_id);
+}
+
+async function editCollection(req, res) {
+  const {id, collectionName } = req.body;
+  const user = req.session.user;
+
+  if (!user) {
+    return res.redirect("/login");
+  }
 
   try {
-    const project = await projectModel.findOne({
-      where: {
-        id: id,
-      },
-    });
-    const duration = calculateDuration(startDate, endDate);
 
-    if (!project) return res.render("not-found");
+    const query = `UPDATE public.collections_tb
+    SET name='${collectionName}'
+    WHERE id=${id};`
+  
+    const result = await sequelize.query(query, { type: QueryTypes.UPDATE });
 
-    project.projectName = projectName;
-    project.description = description;
-    project.startDate = startDate;
-    project.endDate = endDate;
-    project.image = url;
-    project.imageId = file.originalname;
-    project.duration = duration.months + "months";
-
-    project.technologies = [nodejs, typescript, reactjs, nextjs];
-
-    await project.save();
+    req.flash("success", "Edit collection success");
 
     res.redirect("/");
   } catch (error) {
@@ -311,36 +319,6 @@ async function editProject(req, res) {
   }
 }
 
-function addCollectionView(req, res) {
-  const user = req.session.user;
-  res.render("collection", { user });
-}
-
-function contact(req, res) {
-  res.render("contact");
-}
-
-async function collectionDetail(req, res) {
-  const user = req.session.user;
-  const { id } = req.params;
-  const query2 = `SELECT * FROM public.collections_tb WHERE id = '${id}'`;
-  const result2 = await sequelize.query(query2, { type: QueryTypes.SELECT });
-
-  const query = `
-  SELECT public.task_tb.*, public.collections_tb.user_id AS user FROM public.task_tb INNER JOIN public.collections_tb
-	ON ${id} = public.collections_tb.id`;
-
-  const result = await sequelize.query(query, { type: QueryTypes.SELECT });
-  // console.log(result);
-  console.log(result2);
-
-  if (!result) return res.render("not-found");
-  res.render("collection-detail", {
-    data: result,
-    collection: result2[0],
-    user,
-  });
-}
 
 app.listen(port, () => {
   console.log("Server is running on PORT :", port);

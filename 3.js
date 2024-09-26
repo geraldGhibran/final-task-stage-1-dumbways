@@ -16,9 +16,8 @@ let space = ' ';
         let row = ''.repeat(i);
         for (let j = 0; j < n - i; j++) {
           row += (j % 2 === 0 && i % 2 ===0 ? '#' : i % 2 !==0 ? '+' : '+' )+ ' ';
-          
         }
-        triangle += row.trim() + '\n' + space.repeat((n + i -4));
+        triangle += row.trim() + '\n' + space.repeat((n + i - 4));
     }
     return triangle;
 }
